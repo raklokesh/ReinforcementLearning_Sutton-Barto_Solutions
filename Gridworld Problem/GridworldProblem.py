@@ -111,4 +111,4 @@ if __name__ == '__main__':
     fig1=plt.gcf()
     fig1.set_size_inches(10,7)
 
-    plt.savefig("GridWorld_StateValues_Optimal.png")
+    plt.savefig("GridWorld_StateValues_Optimal.png")# Saving it as Optimal or Random
