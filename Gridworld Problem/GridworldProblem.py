@@ -12,7 +12,7 @@ class GridWorld:
         self.Initial_Grid = np.zeros((WorldSize, WorldSize))
         self.Final_Grid=[]
 
-    def determine_new_state(self,i,j,action):
+def determine_new_state(i,j,action):
         if action=='N':
             if i==0:
                 NewState=[i,j]
@@ -73,7 +73,7 @@ if __name__ == '__main__':
             for j in range(WorldSize):
                 action_value=[]
                 for action in actions:
-                    [NewState,reward]=Grid.determine_new_state(i,j,action)
+                    [NewState,reward]=determine_new_state(i,j,action)
                     if random==True:
                         Grid.Updated_Grid[i, j]+= action_prob[action] * (reward + discount * Grid.Initial_Grid[NewState[0], NewState[1]])
                     else:
