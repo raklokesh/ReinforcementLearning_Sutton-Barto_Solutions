@@ -51,64 +51,60 @@ def determine_new_state(i,j,action):
         return (NewState,reward)
 
 
+actions = ['N', 'S', 'E', 'W']
+action_prob = {'N': 0.25, 'S': 0.25, 'E': 0.25, 'W': 0.25}
+action_value = {'N': 0, 'S': 0, 'E': 0, 'W': 0}
+discount = 0.9
+random = False # Random or optimal policy
+converged = False
 
+Grid=GridWorld()
 
-if __name__ == '__main__':
-
-    actions = ['N', 'S', 'E', 'W']
-    action_prob = {'N': 0.25, 'S': 0.25, 'E': 0.25, 'W': 0.25}
-    action_value = {'N': 0, 'S': 0, 'E': 0, 'W': 0}
-    discount = 0.9
-    random = False # Random or optimal policy
-    converged = False
-
-    Grid=GridWorld()
-
-    UpdateNo=0
-    while converged==False:
-        print("Update number {}".format(UpdateNo))
-        UpdateNo+=1
-        Grid.Updated_Grid=np.zeros((WorldSize, WorldSize))
-        for i in range(WorldSize):
-            for j in range(WorldSize):
-                action_value=[]
-                for action in actions:
-                    [NewState,reward]=determine_new_state(i,j,action)
-                    if random==True:
-                        Grid.Updated_Grid[i, j]+= action_prob[action] * (reward + discount * Grid.Initial_Grid[NewState[0], NewState[1]])
-                    else:
-                        action_value.append(reward + discount * Grid.Initial_Grid[NewState[0], NewState[1]])
-                if random==False:
-                    Grid.Updated_Grid[i,j]=action_value[np.random.choice(np.flatnonzero(action_value==np.max(action_value)))]
-
-        if np.sum(np.abs(Grid.Updated_Grid - Grid.Initial_Grid))<0.0001:
-            converged=True
-            Grid.Final_Grid= copy.copy(Grid.Updated_Grid)
-        else:
-            Grid.Initial_Grid= copy.copy(Grid.Updated_Grid)
-
-    # Can verify results using bellman's equations. Below are the equations for some of the cells in the first row:
-    # Cell 1 : 0.55*V11=0.225*V12+0.225*V21-0.5
-    # Cell 2 : 4*V12=3.6*V52+40
-    # Cell 3 : 3.1*V13=0.9*V12+0.9*V14+0.9*V23-1
-    # In fact the state values can be obtained by solving the set of linear equations,
-    # obtained by writing bellman equation for all cells as shown above
-
-
-    plt.figure()
-    Grid_plot=plt.subplot()
+UpdateNo=0
+while converged==False:
+    print("Update number {}".format(UpdateNo))
+    UpdateNo+=1
+    Grid.Updated_Grid=np.zeros((WorldSize, WorldSize))
     for i in range(WorldSize):
         for j in range(WorldSize):
-            value=str(np.round(Grid.Final_Grid[i,j],1))
-            Grid_plot.text(j+0.5,5-i-0.5,value,ha='center',va='center')
+            action_value=[]
+            for action in actions:
+                [NewState,reward]=determine_new_state(i,j,action)
+                if random==True:
+                    Grid.Updated_Grid[i, j]+= action_prob[action] * (reward + discount * Grid.Initial_Grid[NewState[0], NewState[1]])
+                else:
+                    action_value.append(reward + discount * Grid.Initial_Grid[NewState[0], NewState[1]])
+            if random==False:
+                Grid.Updated_Grid[i,j]=action_value[np.random.choice(np.flatnonzero(action_value==np.max(action_value)))]
 
-    Grid_plot.grid(color='k')
-    Grid_plot.axis('scaled')
-    Grid_plot.axis([0, 5, 0, 5])
-    Grid_plot.set_yticklabels([])
-    Grid_plot.set_xticklabels([])
+    if np.sum(np.abs(Grid.Updated_Grid - Grid.Initial_Grid))<0.0001:
+        converged=True
+        Grid.Final_Grid= copy.copy(Grid.Updated_Grid)
+    else:
+        Grid.Initial_Grid= copy.copy(Grid.Updated_Grid)
 
-    fig1=plt.gcf()
-    fig1.set_size_inches(10,7)
+# Can verify results using bellman's equations. Below are the equations for some of the cells in the first row:
+# Cell 1 : 0.55*V11=0.225*V12+0.225*V21-0.5
+# Cell 2 : 4*V12=3.6*V52+40
+# Cell 3 : 3.1*V13=0.9*V12+0.9*V14+0.9*V23-1
+# In fact the state values can be obtained by solving the set of linear equations,
+# obtained by writing bellman equation for all cells as shown above
 
-    plt.savefig("GridWorld_StateValues_Optimal.png")# Saving it as Optimal or Random
+
+plt.figure()
+Grid_plot=plt.subplot()
+for i in range(WorldSize):
+    for j in range(WorldSize):
+        value=str(np.round(Grid.Final_Grid[i,j],1))
+        Grid_plot.text(j+0.5,5-i-0.5,value,ha='center',va='center')
+
+Grid_plot.grid(color='k')
+Grid_plot.axis('scaled')
+Grid_plot.axis([0, 5, 0, 5])
+Grid_plot.set_yticklabels([])
+Grid_plot.set_xticklabels([])
+
+fig1=plt.gcf()
+fig1.set_size_inches(10,7)
+
+plt.savefig("GridWorld_StateValues_Optimal.png")# Saving it as Optimal or Random
