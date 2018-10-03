@@ -1,5 +1,5 @@
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 class player():
     def __init__(self):
@@ -57,16 +57,21 @@ def decide_winner(player_sum,dealer_sum, action_player,action_dealer):
 deck=np.arange(1,10)
 deck=np.append(deck,[10,10,10,10])
 deck=np.repeat(deck,4)
-state_values=np.zeros(30)
+state_values=np.zeros(21)
+
+Returns=[[] for i in range(21)]
+
 
 game_results=[]
-Games=100
+Games=10000
 
 player=player()
 dealer=dealer()
 
 
 for Game_No in range(Games):
+    if Game_No in np.arange(0,Games,1000):
+        print("Finished {} games".format(Game_No))
 
     rewards=[]
     states=[]
@@ -76,11 +81,11 @@ for Game_No in range(Games):
     dealer_played=False
 
     player_sum_choice, action_player = decide(player.cards, player.stick_threshold)
+    states.append(player_sum_choice)
 
     game_ended = False
     while action_player=='hit':
         old_action=action_player
-        states.append(player_sum_choice)
 
         new_card=pick_cards(1)
         player.cards=np.append(player.cards,new_card)
@@ -89,6 +94,7 @@ for Game_No in range(Games):
 
         if old_action == 'hit' and action_player == 'hit':
             rewards.append(0)
+            states.append(player_sum_choice)
 
     dealer_sum_choice, action_dealer = decide(dealer.cards, dealer.stick_threshold)
 
@@ -103,7 +109,22 @@ for Game_No in range(Games):
     states.append(player_sum_choice)
     rewards.append(game_results[Game_No])
 
-    for step in np.arange(len(rewards),0,-1):
-        state_values[states[step-1]] = state_values[states[step]]+rewards[step-1]
+    G=0 # The return after last state change is 0 since that is the terminal state
+    for step in np.arange(1,len(rewards)+1):
+       G = G + rewards[-step] # Expected future return from that state
+       Returns[states[-step-1]-1]+=[G] # Storing the expected return for that state
 
 
+for i in range(21):
+    if not not Returns[i]:
+        state_values[i] = np.mean(Returns[i])
+
+
+Value_plot=plt.subplot()
+Value_plot.plot(np.arange(12,22,1),state_values[11:21],'r--')
+Value_plot.set_yticks(np.arange(-1,1.1,0.2))
+Value_plot.set_xticks(np.arange(12,22,1))
+Value_plot.set_ylabel('Average expected return (State values) ')
+Value_plot.set_xlabel('States ')
+
+plt.savefig("State_Values" + ".png", bbox_inches="tight")
