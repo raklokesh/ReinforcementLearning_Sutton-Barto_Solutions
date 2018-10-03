@@ -29,11 +29,11 @@ def decide(cards,threshold):
 
 def choose_action(decision_sum,threshold):
     if decision_sum < threshold:
-        action = 'h'
+        action = 'hit'
     elif decision_sum in np.arange(threshold, 22):
-        action = 's'
+        action = 'stick'
     else:
-        action = 'e'
+        action = 'bust'
 
     return action
 
@@ -41,31 +41,24 @@ def choose_action(decision_sum,threshold):
 def pick_cards(n):
     return np.random.choice(deck,n)
 
-def decide_winner(player_sum,dealer_sum, check_stop):
-    if check_stop == 'c':
-        if dealer_sum == 21 or player_sum > 21:
-            game_results.append(-1)
-            return True
-        elif player_sum == 21 or dealer_sum > 21:
-            game_results.append(1)
-            return True
-        else:
-            return False
-    elif check_stop == 's':
+def decide_winner(player_sum,dealer_sum, action_player,action_dealer):
+    if action_dealer == 'stick' and action_player == 'stick':
         if player_sum>dealer_sum:
             game_results.append(1)
-        elif player_sum<dealer_sum:
+        elif dealer_sum>player_sum:
             game_results.append(-1)
         else:
             game_results.append(0)
-        return True
+    elif action_player == 'stick' and action_dealer == 'bust':
+        game_results.append(1)
     else:
-        game_results.append(0)
-        return True
+        game_results.append(-1)
 
 deck=np.arange(1,10)
 deck=np.append(deck,[10,10,10,10])
 deck=np.repeat(deck,4)
+state_values=np.zeros(30)
+
 game_results=[]
 Games=100
 
@@ -75,31 +68,42 @@ dealer=dealer()
 
 for Game_No in range(Games):
 
+    rewards=[]
+    states=[]
+
     player.__init__()
     dealer.__init__()
+    dealer_played=False
 
     player_sum_choice, action_player = decide(player.cards, player.stick_threshold)
-    dealer_sum_choice, action_dealer = decide(dealer.cards, dealer.stick_threshold)
-
 
     game_ended = False
-    while not game_ended:
-        if action_player == 'h':
-            new_card=pick_cards(1)
-            player.cards=np.append(player.cards,new_card)
-        if action_dealer == 'h':
+    while action_player=='hit':
+        old_action=action_player
+        states.append(player_sum_choice)
+
+        new_card=pick_cards(1)
+        player.cards=np.append(player.cards,new_card)
+
+        player_sum_choice,action_player=decide(player.cards,player.stick_threshold)
+
+        if old_action == 'hit' and action_player == 'hit':
+            rewards.append(0)
+
+    dealer_sum_choice, action_dealer = decide(dealer.cards, dealer.stick_threshold)
+
+    if action_player != 'bust':
+        dealer_played = True
+        while action_dealer == 'hit':
             new_card = pick_cards(1)
             dealer.cards = np.append(dealer.cards, new_card)
-        player_sum_choice,action_player=decide(player.cards,player.stick_threshold)
-        dealer_sum_choice,action_dealer = decide(dealer.cards, dealer.stick_threshold)
-        if (action_dealer=='s' and action_player=='s') or (action_dealer=='e' and action_player=='e'):
-            game_ended=decide_winner(player_sum_choice,dealer_sum_choice,action_dealer)
-        else:
-            game_ended = decide_winner(player_sum_choice, dealer_sum_choice, 'c')
+            dealer_sum_choice,action_dealer = decide(dealer.cards, dealer.stick_threshold)
 
+    decide_winner(player_sum_choice,dealer_sum_choice,action_player,action_dealer)
+    states.append(player_sum_choice)
+    rewards.append(game_results[Game_No])
 
-
-
-
+    for step in np.arange(len(rewards),0,-1):
+        state_values[states[step-1]] = state_values[states[step]]+rewards[step-1]
 
 
