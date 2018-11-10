@@ -1,4 +1,4 @@
-** Demonstrating infinite variance property of Ordinary Imortance Sampling Example 5.5  **
+**Demonstrating infinite variance property of Ordinary Imortance Sampling Example 5.5**
 
 The ordinary importance sampling does not converge even after 10^6 episodes
 
