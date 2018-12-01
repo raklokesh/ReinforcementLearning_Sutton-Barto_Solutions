@@ -6,3 +6,4 @@
 2. I couldnt obtain the sum of rewards per episode plot as shown in the book using a single episode. 
    I tried averaging the sum of rewards across 1000 runs (run time was more than 20 minutes on my machine), but the lines were not as smooth    and I am not sure if a smoothing was required to generate those plots.
     
+3. Note that the Sarsa optimal policy generates a safer path in the upper portion of the grid, but this path can be variable between episode. I have attached three out of the many possibilities here.
