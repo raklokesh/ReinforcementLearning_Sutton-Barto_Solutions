@@ -9,5 +9,6 @@ I note here that the number of actions from B is not specified, so I have drawn 
 the lower limit of actions i.e. one action. The simlations are run for different number of actions in B = 1 or 2 or 5 or 10 or 100.
 
 _Results_
+
 Generally with larger number of actions the true value is learnt later, leading to the persistence of the bias for longer number of episodes. 
 For one action, there is a bias only in the first few episodes whereas for 100 actions the bias persists throughout all episodes.
