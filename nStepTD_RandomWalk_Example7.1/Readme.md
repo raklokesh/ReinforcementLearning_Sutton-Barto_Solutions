@@ -1,4 +1,5 @@
-** nStep TD method with different n and alfa values for random walk: Example 7.1**
+**nStep TD method with different n and alfa values for random walk: Example 7.1**
+
 _Implementation_
 
 Ran the n-step TD algorithm for several n-step values and alfa values. Plotted the RMSE averages across first 10 episodes and 100 such runs.
