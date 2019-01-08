@@ -59,10 +59,10 @@ def run_experiments():
         steps_episode = np.zeros(EPISODES)
         global Q_values
         Q_values = np.zeros((6,9,4))
+        visited_states_list = []
         for episode in range(EPISODES):
             current_state = np.array([3,0])
             terminated = False
-            visited_states_list = []
             step = 0
             while not terminated:
                 action = choose_action(current_state)
