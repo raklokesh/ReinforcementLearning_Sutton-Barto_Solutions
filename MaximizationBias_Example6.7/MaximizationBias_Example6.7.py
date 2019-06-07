@@ -1,67 +1,71 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def choose_action(state):
-    e = np.random.random()
-    if e < EPSILON:
-        action = np.random.choice(ACTIONS[state])
-    else:
-        action = np.random.choice(np.flatnonzero(Q_values[state] == np.max(Q_values[state])))
+class simulation:
+    def __init__(self,action_num):
+        self.action_num = action_num
+        self.ACTIONS = [[0,1],[i for i in range(action_num)]]
+        self.Q_values = [[0.0,0.0],[0.0 for i in range(action_num)]]
 
-    return action
+    def choose_action(self,state):
+        e = np.random.random()
+        if e < EPSILON:
+            action = np.random.choice(self.ACTIONS[state])
+        else:
+            action = np.random.choice(np.flatnonzero(self.Q_values[state] == np.max(self.Q_values[state])))
 
-def determine_nextState(state,action,episode):
-    reward = 0
-    cur_state = 2
-    if state == 0:
-        if action == 0:
-            cur_state = 1
-            left_actions[episode]=1
-    if state == 1:
-        reward = np.random.normal(-0.1, 1)
-    return cur_state,reward
+        return action
 
+    def determine_transition(self,cur_state,action):
+        next_state = None
+        ended = True
+        if cur_state == 0:
+            reward = 0
+            if action == 0:
+                next_state = 1
+                ended = False
+        if cur_state == 1:
+            reward = np.random.normal(-0.1, 1)
+        return next_state,reward,ended
 
-def update_qValues(current_state,action,next_state,reward):
-    max_Q = Q_values[next_state][np.random.choice(np.flatnonzero(Q_values[next_state] == np.max(Q_values[next_state])))]
-    Q_values[current_state][action] += ALFA * (reward+ max_Q- Q_values[current_state][action])
+    def update_QValues(self,curr_state,action,reward,next_state):
+        if next_state == None:
+            self.Q_values[curr_state][action]+=ALFA*(reward-self.Q_values[curr_state][action])
+        else:
+            max_nextQValue = np.max(self.Q_values[next_state])
+            self.Q_values[curr_state][action] += ALFA * (reward + GAMMA*max_nextQValue- self.Q_values[curr_state][action])
 
-
-def run_simulation():
-    Avg_left_actions = np.zeros(EPISODES)
-    for run in range(RUNS):
-        if run in np.arange(0,RUNS,RUNS/10):
-            print('Running {}'.format(run))
-        global Q_values,left_actions
-        Q_values = [[0, 0], [0 for i in range(B_ACTIONS)], [0]]
-        left_actions = np.zeros(EPISODES)
+    def run_simulation(self):
+        episode_direction = []
         for episode in range(EPISODES):
-            current_state = 0
+            curr_state = 0
             while True:
-                action = choose_action(current_state)
-                next_state,reward = determine_nextState(current_state,action,episode)
-                update_qValues(current_state,action,next_state,reward)
-                current_state = next_state
-                if next_state==2:
+                action = self.choose_action(curr_state)
+                next_state, reward, episode_ended= self.determine_transition(curr_state, action)
+                self.update_QValues(curr_state,action,reward,next_state)
+
+                if episode_ended:
+                    episode_direction.append(1 if curr_state == 1 else 0)
                     break
 
-        left_actions = np.divide(np.cumsum(left_actions),np.arange(1,EPISODES+1))
-        Avg_left_actions+=left_actions
+                curr_state = next_state
+        return 100*np.divide(np.cumsum(episode_direction),np.arange(1,EPISODES+1))
 
-    return Avg_left_actions/RUNS*100
-
-
-ALFA = 0.1
-RUNS = 1000
-EPISODES = 300
 EPSILON = 0.1
-
 B_ACTION_CHOICE = [1,2,5,10,100]
-Percentage_left_actions = []
-for B_ACTIONS in B_ACTION_CHOICE:
-    ACTIONS = [[0, 1], [i for i in range(B_ACTIONS)]]
-    Percentage_left_actions.append(run_simulation())
+ALFA = 0.1
+GAMMA = 1
+EPISODES = 300
+RUNS = 10000
+Percentage_left_actions = np.zeros((len(B_ACTION_CHOICE),EPISODES))
+for run in range(RUNS):
+    if run in np.arange(0,RUNS,RUNS/10):
+        print('Run number = {}'.format(run))
+    for i,action_num in enumerate(B_ACTION_CHOICE):
+        Sim = simulation(action_num)
+        Percentage_left_actions[i,:]+=Sim.run_simulation()
 
+Percentage_left_actions/=RUNS
 
 fig = plt.figure(figsize=(8,10))
 Actions_Plot = plt.subplot()
