@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Two methods have been shown: 1 - Monte carlo method of averaging state values 2 - Simultaneous solution to bellmans equations
+# Two methods have been shown: 1 - Q-learning of state action values 2 - Simultaneous solution to bellmans equations
 
 # METHOD 1
 def choose_action():
@@ -39,7 +39,7 @@ for epsilon in EPSILON_RANGE:
                         -1 + stateAction_value[next_state, next_action] - stateAction_value[current_state, current_action])
             current_state = next_state
             current_action = next_action
-    state_value.append(epsilon * stateAction_value[0, 1] + (1 - epsilon) * stateAction_value[0, 0])
+    state_value.append(epsilon * stateAction_value[0, 1] + (1 - epsilon) * stateAction_value[0, 0]) # Compute state value using state-action values
 
 stateValue_plot = plt.subplot()
 stateValue_plot.plot(EPSILON_RANGE,state_value,'k')
